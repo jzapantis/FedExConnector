@@ -26,7 +26,7 @@ app.listen(appEnv.port, '0.0.0.0', function () {
   console.log("server starting on " + appEnv.url);
 });
 ////////////////////////////////////////
-var db = require("./lib/db/crud/index.js")
+var db = require("./lib/db/crud/index.js");
 ////////////////////////////////////////
 app.post('/testGoogle', function (req, res) {
   var doc = req.body;
@@ -73,5 +73,4 @@ app.post('/testGoogle', function (req, res) {
       }
     });
   }
-
 });
