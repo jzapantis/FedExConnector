@@ -7,6 +7,7 @@ var app = express();
 var appEnv = cfenv.getAppEnv();
 var bodyParser = require('body-parser');
 var fedexAPI = require('shipping-fedex');
+var Cloudant = require('cloudant');
 
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json()); // for parsing application/json
@@ -73,4 +74,40 @@ app.post('/testGoogle', function (req, res) {
       }
     });
   }
+});
+
+app.get('/getTrackingNumbers', function (req, res) {
+
+  var usr = '148f1d3e-9ac8-4b76-be8b-5f89ee464ffc-bluemix';
+  var pwd = 'e96ccc3165556303402511e315c0b52cd9bbcbc5d48042697ad122e0646db1aa';
+
+  var cloudant = Cloudant({
+    account: usr,
+    password: pwd
+  });
+
+  var fedEx = cloudant.db.use('tracking-numbers');
+
+  var query = {
+    "selector": {
+      "_id": {
+        "$gt": 0
+      }
+    },
+    "sort": [{
+      "_id": "asc"
+    }]
+  }
+
+  fedEx.find(query, function (error, result) {
+    if (error) {
+      console.log("Request did not return a 200, or there was error: ", error);
+      res.send("error: ", error)
+    }
+    if (!error) {
+      console.log(result);
+      res.send(result);
+    }
+    return;
+  });
 });
