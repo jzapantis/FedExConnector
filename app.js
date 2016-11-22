@@ -58,7 +58,7 @@ app.post('/testGoogle', function (req, res) {
     email: ""
   };
   console.log("quantity of new inserts: ", newTrackingNumbers.length)
-  var db = new Db('test', new Server('localhost', 27017));
+  var db = new Db('PwCLocalMongoDB', new Server('localhost', 27017)); // what should be the first parameter of the Db("?", )
   db.open(function (err, db) {
     var col = db.collection('ITOrders');
     var batch = col.initializeUnorderedBulkOp({ useLegacyOps: true });
@@ -75,6 +75,19 @@ app.post('/testGoogle', function (req, res) {
     batch.execute(function (err, result) {
       res.send(result);
       db.close();
+    });
+  });
+});
+
+app.get('/getTrackingNumbers', function (req, res) {
+  var db = new Db('IT_ORDERS', new Server('localhost', 27017));
+  db.open(function (err, db) {
+    db.collection('ORDERS_MASTER', function (err, collection) {
+      collection.find().toArray(function (err, items) {
+        console.log(items[0]);
+        res.send(items[0]);
+        db.close();
+      });
     });
   });
 });
