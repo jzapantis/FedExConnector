@@ -27,20 +27,8 @@ app.listen(appEnv.port, '0.0.0.0', function () {
   console.log("server starting on " + appEnv.url);
 });
 ////////////////////////////////////////
-// var db = require("./lib/db/crud/index.js");
-////////////////////////////////////////
-var Db = require('mongodb').Db,
-  MongoClient = require('mongodb').MongoClient,
-  Server = require('mongodb').Server,
-  ReplSetServers = require('mongodb').ReplSetServers,
-  ObjectID = require('mongodb').ObjectID,
-  Binary = require('mongodb').Binary,
-  GridStore = require('mongodb').GridStore,
-  Grid = require('mongodb').Grid,
-  Code = require('mongodb').Code,
-  // BSON = require('mongodb').pure().BSON, ---- NOT WORKING FOR SOME REASON
-  assert = require('assert');
 
+var db = require('./lib/db/crud/index.js');
 
 ////////////////////////////////////////
 app.post('/testGoogle', function (req, res) {
@@ -58,36 +46,33 @@ app.post('/testGoogle', function (req, res) {
     email: ""
   };
   console.log("quantity of new inserts: ", newTrackingNumbers.length)
-  var db = new Db('PwCLocalMongoDB', new Server('localhost', 27017)); // what should be the first parameter of the Db("?", )
-  db.open(function (err, db) {
-    var col = db.collection('ITOrders');
-    var batch = col.initializeUnorderedBulkOp({ useLegacyOps: true });
-    for (var i = 0; i < newTrackingNumbers.length; i++) {
-      console.log("NEW INSERT ####################")
-      insertDoc.timeStamp = doc.timeStamp;
-      insertDoc.email = doc.submissionEmail;
-      insertDoc.trackingNumber = newTrackingNumbers[i];
-      console.log("document being inserted into the DB: ", insertDoc)
-      console.log("current tracking number being inserted: ", newTrackingNumbers[i])
-      insertDocs.push(insertDoc);
-      batch.insert(insertDoc);
+  for (var i = 0; i < newTrackingNumbers.length; i++) {
+    console.log("NEW INSERT ####################")
+    insertDoc.timeStamp = doc.timeStamp;
+    insertDoc.email = doc.submissionEmail;
+    insertDoc.trackingNumber = newTrackingNumbers[i];
+    console.log("document being inserted into the DB: ", insertDoc)
+    console.log("current tracking number being inserted: ", newTrackingNumbers[i])
+    insertDocs.push(insertDoc);
+  }
+  db.create(insertDocs, function (err, insertRes) {
+    if (err) {
+      res.send(err);
     }
-    batch.execute(function (err, result) {
-      res.send(result);
-      db.close();
-    });
+    if (!err) {
+      res.send(insertRes);
+    }
   });
 });
 
 app.get('/getTrackingNumbers', function (req, res) {
-  var db = new Db('IT_ORDERS', new Server('localhost', 27017));
-  db.open(function (err, db) {
-    db.collection('ORDERS_MASTER', function (err, collection) {
-      collection.find().toArray(function (err, items) {
-        console.log(items[0]);
-        res.send(items[0]);
-        db.close();
-      });
-    });
-  });
+  var queryParams = "";
+  db.read(queryParams, function (err, readRes) {
+    if (err) {
+      res.send(err);
+    }
+    if (!err) {
+      res.send(readRes);
+    }
+  })
 });
