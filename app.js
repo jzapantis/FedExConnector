@@ -31,6 +31,53 @@ app.listen(appEnv.port, '0.0.0.0', function () {
 var db = require('./lib/db/crud/index.js');
 
 ////////////////////////////////////////
+app.post('/track', function (req, res) {
+
+  var fedex = new fedexAPI({
+    environment: 'sandbox', // or live
+    debug: true,
+    key: 'm6V9MCeAJClXOJ0t',
+    password: '5U1RdXE7rvlo5tMeBb6vQb49S',
+    account_number: '510087186',
+    meter_number: '118754438',
+    imperial: true // set to false for metric
+  });
+
+  console.log(req.body.value);
+
+  var fedExOptions = {
+    SelectionDetails: {
+      PackageIdentifier: {
+        Type: 'TRACKING_NUMBER_OR_DOORTAG',
+        Value: req.body.value
+      }
+    }
+  }
+
+  var exportObject = {};
+
+  fedex.track(fedExOptions, function (err, result) {
+    if (err) {
+      return console.log(err);
+    } else {
+      exportObject.Message = result.CompletedTrackDetails[0].Notifications[0].Message;
+      exportObject.TrackingNumber = result.CompletedTrackDetails[0].TrackDetails[0].TrackingNumber;
+      exportObject.TrackingNumberUniqueIdentifier = result.CompletedTrackDetails[0].TrackDetails[0].TrackingNumberUniqueIdentifier;
+      exportObject.ServiceCommitMessage = result.CompletedTrackDetails[0].TrackDetails[0].ServiceCommitMessage;
+      exportObject.CarrierCode = result.CompletedTrackDetails[0].TrackDetails[0].CarrierCode;
+      exportObject.OperatingCompanyOrCarrierDescription = result.CompletedTrackDetails[0].TrackDetails[0].OperatingCompanyOrCarrierDescription;
+      exportObject.ShipperAddress = result.CompletedTrackDetails[0].TrackDetails[0].ShipperAddress;
+      exportObject.ShipTimestamp = result.CompletedTrackDetails[0].TrackDetails[0].ShipTimestamp;
+      exportObject.StatusUpdateTime = result.CompletedTrackDetails[0].TrackDetails[0].StatusDetail.Description;
+      exportObject.statusCode = result.CompletedTrackDetails[0].TrackDetails[0].StatusDetail.Code;
+      exportObject.statusLocation = result.CompletedTrackDetails[0].TrackDetails[0].StatusDetail.Location;
+
+      console.log(result.CompletedTrackDetails[0].TrackDetails[0].DestinationAddress);
+      res.send(exportObject);
+    }
+  });
+});
+
 app.post('/testGoogle', function (req, res) {
   var doc = req.body;
   var newTrackingNumbers = doc.trackingNumbers;
@@ -73,6 +120,19 @@ app.get('/getTrackingNumbers', function (req, res) {
     }
     if (!err) {
       res.send(readRes);
+    }
+  })
+});
+
+app.get('/delete', function (req, res) {
+  var deleteDoc = req.body.deleteDoc = "58346d53c1ae052b0446b972";
+  db.delete(deleteDoc, function (err, deleteRes) {
+    if (err) {
+      res.send(err);
+    }
+    if (!err) {
+      console.log(deleteRes)
+      res.send(deleteRes);
     }
   })
 });
