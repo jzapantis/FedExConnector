@@ -78,7 +78,7 @@ app.post('/track', function (req, res) {
   });
 });
 
-app.post('/testGoogle', function (req, res) {
+app.post('/addForm', function (req, res) {
   var doc = req.body;
   var newTrackingNumbers = doc.trackingNumbers;
   console.log("type of incoming tracking numbers variable: ", typeof newTrackingNumbers)
@@ -112,6 +112,45 @@ app.post('/testGoogle', function (req, res) {
   });
 });
 
+app.post('/addUI', function (req, res) {
+
+  var trackingNumbers = req.body.trackingNumber;
+
+  if (trackingNumbers.length >= 24) {
+    var formattedTrackingNumbers = trackingNumbers.split(/\r\n|\r|\n|,|;|\s+/g);
+    console.log("multiple tracking numbers submitted");
+  } else {
+    formattedTrackingNumbers = trackingNumbers;
+    console.log("single tracking number submitted");
+  }
+
+  var d = new Date();
+  var insertDocs = [];
+  console.log("quantity of new inserts: ", formattedTrackingNumbers.length)
+  for (var i = 0; i < formattedTrackingNumbers.length; i++) {
+    var insertDoc = {
+      timeStamp: d,
+      trackingNumber: ""
+    };
+    console.log("NEW INSERT OBJECT - ", i, " - ####################")
+    insertDoc.trackingNumber = formattedTrackingNumbers[i];
+    insertDocs.push(insertDoc);
+  }
+  console.log("ARRAY PASSED TO CRUD MODULE: ")
+  console.log(insertDocs)
+  console.log("INSERTING......")
+  db.create(insertDocs, function (err, insertRes) {
+    if (err) {
+      console.log(err);
+      res.send(err);
+    }
+    if (!err) {
+      console.log(insertRes);
+      res.send(insertRes);
+    }
+  });
+});
+
 app.get('/getTrackingNumbers', function (req, res) {
   var queryParams = "";
   db.read(queryParams, function (err, readRes) {
@@ -119,13 +158,14 @@ app.get('/getTrackingNumbers', function (req, res) {
       res.send(err);
     }
     if (!err) {
+      console.log(readRes);
       res.send(readRes);
     }
   })
 });
 
-app.get('/delete', function (req, res) {
-  var deleteDoc = req.body.deleteDoc = "58346d53c1ae052b0446b972";
+app.post('/delete', function (req, res) {
+  var deleteDoc = req.body.deleteDoc;
   db.delete(deleteDoc, function (err, deleteRes) {
     if (err) {
       res.send(err);
