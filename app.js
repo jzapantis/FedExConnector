@@ -67,7 +67,7 @@ app.post('/addForm', function (req, res) {
 
 app.post('/addUI', function (req, res) {
 
-  var trackingNumbers = req.body.trackingNumber;
+  var trackingNumbers = req.body.trackingNumbers;
 
   if (trackingNumbers.length >= 24) {
     var formattedTrackingNumbers = trackingNumbers.split(/\r\n|\r|\n|,|;|\s+/g);
