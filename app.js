@@ -68,30 +68,36 @@ app.post('/addForm', function (req, res) {
 app.post('/addUI', function (req, res) {
 
   var trackingNumbers = req.body.trackingNumbers;
+  var formattedTrackingNumbers = trackingNumbers.split(/\r\n|\r|\n|,|;|\s+/g);
 
-  if (trackingNumbers.length >= 24) {
-    var formattedTrackingNumbers = trackingNumbers.split(/\r\n|\r|\n|,|;|\s+/g);
-    console.log("multiple tracking numbers submitted");
-  } else {
-    formattedTrackingNumbers = trackingNumbers;
-    console.log("single tracking number submitted");
-  }
+  var date = new Date();
+  var hr = date.getHours();
+  var d = date.getDate();
+  var m = date.getMonth();
+  var yr = date.getFullYear();
 
-  var d = new Date();
   var insertDocs = [];
+
   console.log("quantity of new inserts: ", formattedTrackingNumbers.length)
   for (var i = 0; i < formattedTrackingNumbers.length; i++) {
     var insertDoc = {
       timeStamp: d,
+      hour: hr,
+      day: d,
+      month: m,
+      year: yr,
       trackingNumber: ""
     };
-    console.log("NEW INSERT OBJECT - ", i, " - ####################")
+    console.log("#################### NEW INSERT OBJECT - ", i, " ####################")
     insertDoc.trackingNumber = formattedTrackingNumbers[i];
     insertDocs.push(insertDoc);
   }
+  console.log("")
   console.log("ARRAY PASSED TO CRUD MODULE: ")
   console.log(insertDocs)
+  console.log("")
   console.log("INSERTING......")
+  
   db.create(insertDocs, function (err, insertRes) {
     if (err) {
       console.log(err);
@@ -109,13 +115,13 @@ app.get('/getTrackingNumbers', function (req, res) {
   var queryParams = "";
   db.read(queryParams, function (err, readRes) {
     if (err) {
-      res.send("DB Read Error: ", err);
+      res.send(err);
     }
     if (!err) {
       console.log("readsuccessful");
       fedEx.track(readRes, function (err, trackingRes) {
         if (err) {
-          res.send("Tracking error: ", err);
+          res.send(err);
         }
         if (!err) {
           res.send(trackingRes);
