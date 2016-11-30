@@ -112,12 +112,12 @@ app.get('/getTrackingNumbers', function (req, res) {
       res.send("DB Read Error: ", err);
     }
     if (!err) {
+      console.log("readsuccessful");
       fedEx.track(readRes, function (err, trackingRes) {
         if (err) {
           res.send("Tracking error: ", err);
         }
         if (!err) {
-          console.log(trackingRes);
           res.send(trackingRes);
         }
       })
