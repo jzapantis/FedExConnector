@@ -81,7 +81,7 @@ app.post('/addUI', function (req, res) {
   console.log("quantity of new inserts: ", formattedTrackingNumbers.length)
   for (var i = 0; i < formattedTrackingNumbers.length; i++) {
     var insertDoc = {
-      timeStamp: d,
+      timeStamp: date,
       hour: hr,
       day: d,
       month: m,
