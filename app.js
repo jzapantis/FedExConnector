@@ -97,14 +97,14 @@ app.post('/addUI', function (req, res) {
   console.log(insertDocs)
   console.log("")
   console.log("INSERTING......")
-  
-  db.create(insertDocs, function (err, insertRes) {
+
+  db.create(insertDocs, "ORDERS_MASTER", function (err, insertRes) {
     if (err) {
       console.log(err);
       res.send(err);
     }
     if (!err) {
-      console.log(insertRes);
+      console.log("INSERT SUCCESS");
       res.send(insertRes);
     }
   });
@@ -132,8 +132,10 @@ app.get('/getTrackingNumbers', function (req, res) {
 });
 
 app.post('/delete', function (req, res) {
+  console.log("")
   console.log("deleteObj received: ", req.body)
-  var body = req.body;
+  console.log("")
+  var body = req.body.trackingNumber;
   db.delete(body, function (err, deleteRes) {
     if (err) {
       res.send(err);
@@ -142,4 +144,34 @@ app.post('/delete', function (req, res) {
       res.send(deleteRes);
     }
   })
+});
+
+app.post('/archive', function (req, res) {
+  console.log("")
+  console.log("archiveObj received: ", req.body)
+  console.log("")
+
+  var doc = [];
+  doc.push({trackingNumber: req.body.trackingNumbers})
+
+  db.create(doc, "ARCHIVED_TRACKING_NUMBERS", function (err, insertRes) {
+    if (err) {
+      console.log(err);
+      res.send(err);
+    }
+    if (!err) {
+      console.log("ARCHIVE INSERT SUCCESS");
+      console.log("")
+      console.log(doc[0].trackingNumber)
+      db.delete(doc[0].trackingNumber, function (err, deleteRes) {
+        if (err) {
+          res.send(err);
+        }
+        if (!err) {
+          console.log("DELETED: ", req.body.trackingNumbers, " from ORDERS_MASTER and ARCHIVED it")
+          res.send(deleteRes);
+        }
+      })
+    }
+  });
 });
