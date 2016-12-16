@@ -111,19 +111,18 @@ app.post('/addUI', function (req, res) {
 });
 
 app.get('/getTrackingNumbers', function (req, res) {
-  console.log("getTrackingNumbers");
   var queryParams = "";
   db.read(queryParams, function (err, readRes) {
     if (err) {
       res.send(err);
     }
     if (!err) {
-      console.log("readsuccessful");
       fedEx.track(readRes, function (err, trackingRes) {
         if (err) {
           res.send(err);
         }
         if (!err) {
+          console.log("Tracking Numbers loaded successfully")
           res.send(trackingRes);
         }
       })
@@ -133,13 +132,13 @@ app.get('/getTrackingNumbers', function (req, res) {
 });
 
 app.post('/delete', function (req, res) {
-  var deleteDoc = req.body.deleteDoc;
-  db.delete(deleteDoc, function (err, deleteRes) {
+  console.log("deleteObj received: ", req.body)
+  var body = req.body;
+  db.delete(body, function (err, deleteRes) {
     if (err) {
       res.send(err);
     }
     if (!err) {
-      console.log(deleteRes)
       res.send(deleteRes);
     }
   })
