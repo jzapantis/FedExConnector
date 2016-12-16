@@ -161,14 +161,13 @@ app.post('/archive', function (req, res) {
     }
     if (!err) {
       console.log("ARCHIVE INSERT SUCCESS");
-      console.log("")
-      console.log(doc[0].trackingNumber)
       db.delete(doc[0].trackingNumber, function (err, deleteRes) {
         if (err) {
           res.send(err);
         }
         if (!err) {
           console.log("DELETED: ", req.body.trackingNumbers, " from ORDERS_MASTER and ARCHIVED it")
+          console.log("")
           res.send(deleteRes);
         }
       })
